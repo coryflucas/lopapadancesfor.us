@@ -4,6 +4,10 @@ terraform {
       source  = "hashicorp/aws"
       version = "~> 6.0"
     }
+    cloudflare = {
+      source  = "cloudflare/cloudflare"
+      version = "~> 5"
+    }
   }
 }
 
@@ -31,6 +35,9 @@ resource "aws_s3_bucket_website_configuration" "bucket" {
   }
 }
 
+data "cloudflare_ip_ranges" "cloudflare" {
+}
+
 resource "aws_s3_bucket_policy" "allow_website_access" {
   bucket = aws_s3_bucket.bucket.id
   policy = data.aws_iam_policy_document.allow_website_access.json
@@ -50,5 +57,12 @@ data "aws_iam_policy_document" "allow_website_access" {
     resources = [
       "${aws_s3_bucket.bucket.arn}/*",
     ]
+
+    condition {
+      test     = "IpAddress"
+      variable = "aws:SourceIp"
+      values   = data.cloudflare_ip_ranges.cloudflare.ipv4_cidrs
+    }
+  
   }
 }
