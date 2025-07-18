@@ -35,6 +35,12 @@ resource "aws_s3_bucket_website_configuration" "bucket" {
   }
 }
 
+resource "aws_s3_bucket_logging" "bucket" {
+  bucket        = aws_s3_bucket.bucket.id
+  target_bucket = "logs.617211123486"
+  target_prefix = "lopapadancesfor_us/"
+}
+
 data "cloudflare_ip_ranges" "cloudflare" {
 }
 
@@ -63,6 +69,6 @@ data "aws_iam_policy_document" "allow_website_access" {
       variable = "aws:SourceIp"
       values   = data.cloudflare_ip_ranges.cloudflare.ipv4_cidrs
     }
-  
+
   }
 }
